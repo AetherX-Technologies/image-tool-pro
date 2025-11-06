@@ -11,7 +11,7 @@
 
 [English](README.md) | [简体中文](README-zh.md)
 
-[下载](https://github.com/yourusername/image-tool-pro/releases) | [文档](docs/USER_GUIDE.md) | [反馈问题](https://github.com/yourusername/image-tool-pro/issues)
+[下载](https://github.com/AetherX-Technologies/image-tool-pro/releases) | [文档](docs/USER_GUIDE.md) | [反馈问题](https://github.com/AetherX-Technologies/image-tool-pro/issues)
 
 </div>
 
@@ -124,7 +124,7 @@
 
 ### 最新版本: v1.0.0
 
-**[⬇️ 下载 Windows 版图像工具专业版](https://github.com/yourusername/image-tool-pro/releases/latest)**
+**[⬇️ 下载 Windows 版图像工具专业版](https://github.com/AetherX-Technologies/image-tool-pro/releases/latest)**
 
 **系统要求：**
 - Windows 7 或更高版本（64 位）
@@ -136,7 +136,7 @@
 
 无需安装！只需：
 
-1. 从[发布页面](https://github.com/yourusername/image-tool-pro/releases)下载 ZIP 文件
+1. 从[发布页面](https://github.com/AetherX-Technologies/image-tool-pro/releases)下载 ZIP 文件
 2. 解压到您想要的位置
 3. 运行 `ImageProcessor.exe`
 4. 开始处理图像！
@@ -205,7 +205,7 @@ pillow>=10.0.0    # 图像处理库
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/image-tool-pro.git
+git clone https://github.com/AetherX-Technologies/image-tool-pro.git
 cd image-tool-pro
 
 # 安装依赖
@@ -265,7 +265,7 @@ python test_core.py
 
 ### 贡献方式
 
-- 🐛 通过[Issues](https://github.com/yourusername/image-tool-pro/issues)报告错误
+- 🐛 通过[Issues](https://github.com/AetherX-Technologies/image-tool-pro/issues)报告错误
 - 💡 提出功能或改进建议
 - 📖 改进文档
 - 🌍 添加新语言的翻译
@@ -301,7 +301,7 @@ python test_core.py
 
 - 📚 阅读[用户指南](docs/USER_GUIDE.md)
 - ❓ 查看[常见问题](docs/FAQ.md)
-- 🐛 在 [GitHub Issues](https://github.com/yourusername/image-tool-pro/issues) 上报告问题
+- 🐛 在 [GitHub Issues](https://github.com/AetherX-Technologies/image-tool-pro/issues) 上报告问题
 
 ### 保持更新
 

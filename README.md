@@ -11,7 +11,7 @@
 
 [English](README.md) | [简体中文](README-zh.md)
 
-[Download](https://github.com/yourusername/image-tool-pro/releases) | [Documentation](docs/USER_GUIDE.md) | [Report Bug](https://github.com/yourusername/image-tool-pro/issues)
+[Download](https://github.com/AetherX-Technologies/image-tool-pro/releases) | [Documentation](docs/USER_GUIDE.md) | [Report Bug](https://github.com/AetherX-Technologies/image-tool-pro/issues)
 
 </div>
 
@@ -124,7 +124,7 @@ No hassle, no configuration:
 
 ### Latest Release: v1.0.0
 
-**[⬇️ Download Image Tool Pro for Windows](https://github.com/yourusername/image-tool-pro/releases/latest)**
+**[⬇️ Download Image Tool Pro for Windows](https://github.com/AetherX-Technologies/image-tool-pro/releases/latest)**
 
 **System Requirements:**
 - Windows 7 or later (64-bit)
@@ -136,7 +136,7 @@ No hassle, no configuration:
 
 No installation required! Simply:
 
-1. Download the ZIP file from [Releases](https://github.com/yourusername/image-tool-pro/releases)
+1. Download the ZIP file from [Releases](https://github.com/AetherX-Technologies/image-tool-pro/releases)
 2. Extract to your desired location
 3. Run `ImageProcessor.exe`
 4. Start processing images!
@@ -205,7 +205,7 @@ Want to contribute or build from source? Here's how:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/image-tool-pro.git
+git clone https://github.com/AetherX-Technologies/image-tool-pro.git
 cd image-tool-pro
 
 # Install dependencies
@@ -265,7 +265,7 @@ Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
 
 ### Ways to Contribute
 
-- 🐛 Report bugs via [Issues](https://github.com/yourusername/image-tool-pro/issues)
+- 🐛 Report bugs via [Issues](https://github.com/AetherX-Technologies/image-tool-pro/issues)
 - 💡 Suggest features or improvements
 - 📖 Improve documentation
 - 🌍 Add translations for new languages
@@ -301,7 +301,7 @@ this software for any purpose, including commercial applications.
 
 - 📚 Read the [User Guide](docs/USER_GUIDE.md)
 - ❓ Check the [FAQ](docs/FAQ.md)
-- 🐛 Report issues on [GitHub Issues](https://github.com/yourusername/image-tool-pro/issues)
+- 🐛 Report issues on [GitHub Issues](https://github.com/AetherX-Technologies/image-tool-pro/issues)
 
 ### Stay Updated
 
