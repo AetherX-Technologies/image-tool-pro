@@ -11,14 +11,16 @@ from .language import get_text
 class PixelInfoPanel:
     """像素信息显示面板"""
 
-    def __init__(self, parent_frame):
+    def __init__(self, parent_frame, on_apply_crop_callback=None):
         """
         初始化像素信息面板
 
         参数:
             parent_frame: 父容器
+            on_apply_crop_callback: 确定截取的回调函数
         """
         self.frame = tk.LabelFrame(parent_frame, text=get_text('pixel_info_title'), padx=10, pady=10)
+        self.on_apply_crop_callback = on_apply_crop_callback
 
         # 创建标签
         self.width_label = tk.Label(self.frame, text=f"{get_text('pixel_width')}: 0 {get_text('pixel_unit')}", font=('Arial', 10))
@@ -26,6 +28,13 @@ class PixelInfoPanel:
 
         self.height_label = tk.Label(self.frame, text=f"{get_text('pixel_height')}: 0 {get_text('pixel_unit')}", font=('Arial', 10))
         self.height_label.pack(anchor='w', pady=2)
+
+        # 确定截取按钮
+        self.apply_button = tk.Button(
+            self.frame, text=get_text('apply_crop_button'), command=self.apply_crop,
+            bg='#4CAF50', fg='white', padx=10, pady=3, state='disabled'
+        )
+        self.apply_button.pack(pady=5)
 
     def update(self, x1, y1, x2, y2):
         """
@@ -38,11 +47,20 @@ class PixelInfoPanel:
         height = abs(y2 - y1)
         self.width_label.config(text=f"{get_text('pixel_width')}: {int(width)} {get_text('pixel_unit')}")
         self.height_label.config(text=f"{get_text('pixel_height')}: {int(height)} {get_text('pixel_unit')}")
+        # 启用确定截取按钮
+        self.apply_button.config(state='normal')
 
     def clear(self):
         """清除显示"""
         self.width_label.config(text=f"{get_text('pixel_width')}: 0 {get_text('pixel_unit')}")
         self.height_label.config(text=f"{get_text('pixel_height')}: 0 {get_text('pixel_unit')}")
+        # 禁用确定截取按钮
+        self.apply_button.config(state='disabled')
+
+    def apply_crop(self):
+        """执行确定截取"""
+        if self.on_apply_crop_callback:
+            self.on_apply_crop_callback()
 
 
 class CenterCropPanel:
@@ -244,3 +262,131 @@ class ActionPanel:
             bg='#9C27B0', fg='white', padx=30, pady=10, font=('Arial', 10, 'bold')
         )
         self.preview_button.pack(fill='x', pady=5)
+
+
+class ResizePanel:
+    """图像尺寸调整面板"""
+
+    def __init__(self, parent_frame, on_resize_callback):
+        """
+        初始化尺寸调整面板
+
+        参数:
+            parent_frame: 父容器
+            on_resize_callback: 执行尺寸调整的回调函数
+        """
+        self.frame = tk.LabelFrame(parent_frame, text=get_text('resize_title'), padx=10, pady=10)
+        self.on_resize_callback = on_resize_callback
+
+        # 目标尺寸
+        size_frame = tk.Frame(self.frame)
+        size_frame.pack(fill='x', pady=5)
+
+        tk.Label(size_frame, text=f"{get_text('resize_width')}:").grid(row=0, column=0, sticky='w')
+        self.width_var = tk.StringVar()
+        self.width_entry = tk.Entry(size_frame, textvariable=self.width_var, width=10)
+        self.width_entry.grid(row=0, column=1, padx=5)
+        tk.Label(size_frame, text=get_text('pixel_unit')).grid(row=0, column=2, sticky='w')
+
+        tk.Label(size_frame, text=f"{get_text('resize_height')}:").grid(row=1, column=0, sticky='w', pady=(5, 0))
+        self.height_var = tk.StringVar()
+        self.height_entry = tk.Entry(size_frame, textvariable=self.height_var, width=10)
+        self.height_entry.grid(row=1, column=1, padx=5, pady=(5, 0))
+        tk.Label(size_frame, text=get_text('pixel_unit')).grid(row=1, column=2, sticky='w', pady=(5, 0))
+
+        # 调整模式
+        mode_frame = tk.Frame(self.frame)
+        mode_frame.pack(fill='x', pady=10)
+
+        tk.Label(mode_frame, text=get_text('resize_mode'), font=('Arial', 9, 'bold')).pack(anchor='w')
+
+        self.mode_var = tk.StringVar(value='stretch')
+
+        tk.Radiobutton(
+            mode_frame,
+            text=get_text('resize_mode_stretch'),
+            variable=self.mode_var,
+            value='stretch',
+            font=('Arial', 9)
+        ).pack(anchor='w', padx=10)
+
+        tk.Radiobutton(
+            mode_frame,
+            text=get_text('resize_mode_crop'),
+            variable=self.mode_var,
+            value='crop',
+            font=('Arial', 9)
+        ).pack(anchor='w', padx=10)
+
+        tk.Radiobutton(
+            mode_frame,
+            text=get_text('resize_mode_pad'),
+            variable=self.mode_var,
+            value='pad',
+            font=('Arial', 9)
+        ).pack(anchor='w', padx=10)
+
+        # 执行按钮
+        self.resize_button = tk.Button(
+            self.frame, text=get_text('resize_button'), command=self.execute_resize,
+            bg='#673AB7', fg='white', padx=20, pady=5
+        )
+        self.resize_button.pack(pady=10)
+
+        # 提示标签
+        self.hint_label = tk.Label(
+            self.frame,
+            text=get_text('resize_hint'),
+            font=('Arial', 8), fg='gray'
+        )
+        self.hint_label.pack()
+
+        # 结果显示
+        self.result_label = tk.Label(self.frame, text="", font=('Arial', 9), fg='green')
+        self.result_label.pack()
+
+    def execute_resize(self):
+        """执行尺寸调整"""
+        try:
+            # 获取参数
+            width = self.width_var.get().strip()
+            height = self.height_var.get().strip()
+
+            # 验证必填参数
+            if not width or not height:
+                messagebox.showwarning(get_text('warning'), get_text('warn_enter_size'))
+                return
+
+            # 转换为整数
+            width = int(width)
+            height = int(height)
+
+            # 验证有效性
+            if width <= 0 or height <= 0:
+                messagebox.showerror(get_text('error'), get_text('error_invalid_number'))
+                return
+
+            if width > 10000 or height > 10000:
+                messagebox.showwarning(get_text('warning'), "Size too large, recommended not to exceed 10000 pixels")
+                return
+
+            # 获取调整模式
+            mode = self.mode_var.get()
+
+            # 调用回调函数
+            if self.on_resize_callback:
+                result = self.on_resize_callback(width, height, mode)
+                if result:
+                    self.result_label.config(text=get_text('resize_result', width=width, height=height))
+
+        except ValueError:
+            messagebox.showerror(get_text('error'), get_text('error_invalid_number'))
+
+    def clear_result(self):
+        """清除结果显示"""
+        self.result_label.config(text="")
+
+    def set_current_size(self, width, height):
+        """设置当前图片尺寸到输入框"""
+        self.width_var.set(str(width))
+        self.height_var.set(str(height))

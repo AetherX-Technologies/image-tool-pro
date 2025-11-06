@@ -39,6 +39,7 @@ LANGUAGES = {
         'pixel_width': 'Width',
         'pixel_height': 'Height',
         'pixel_unit': 'px',
+        'apply_crop_button': 'Apply Crop',
 
         # 中心点切割面板
         'center_crop_title': 'Center Crop',
@@ -57,6 +58,23 @@ LANGUAGES = {
         'format_label': 'Format',
         'start_compress': 'Start Compression',
         'compress_result': 'Compression complete! Actual size: {size:.2f} KB',
+
+        # 尺寸调整面板
+        'resize_title': 'Resize Image',
+        'resize_width': 'Width',
+        'resize_height': 'Height',
+        'resize_mode': 'Resize Mode:',
+        'resize_mode_stretch': 'Force Stretch (may distort)',
+        'resize_mode_crop': 'Keep Ratio (crop excess)',
+        'resize_mode_pad': 'Keep Ratio (fill blank)',
+        'resize_button': 'Resize Image',
+        'resize_hint': 'Tip: Convert current image to specified dimensions',
+        'resize_result': 'Resized to {width}×{height}',
+
+        # 缩放按钮提示
+        'zoom_in_hint': 'Zoom In',
+        'zoom_out_hint': 'Zoom Out',
+        'zoom_reset_hint': 'Reset Zoom',
 
         # 操作按钮
         'save_button': 'Save Image',
@@ -95,6 +113,8 @@ LANGUAGES = {
         # 成功消息
         'success_crop': 'Crop complete!\nNew size: {width}x{height}',
         'success_save': 'Image saved successfully!',
+        'success_resize': 'Resized to {width}×{height} pixels',
+        'success_interactive_crop': 'Interactive crop applied!\nNew size: {width}x{height}',
 
         # 保存选项对话框
         'save_option_title': 'Save Options',
@@ -192,6 +212,7 @@ Development Date: 2025-11-06
         'pixel_width': '宽度',
         'pixel_height': '高度',
         'pixel_unit': 'px',
+        'apply_crop_button': '确定截取',
 
         # 中心点切割面板
         'center_crop_title': '中心点切割',
@@ -210,6 +231,23 @@ Development Date: 2025-11-06
         'format_label': '格式',
         'start_compress': '开始压缩',
         'compress_result': '压缩完成！实际大小: {size:.2f} KB',
+
+        # 尺寸调整面板
+        'resize_title': '调整尺寸',
+        'resize_width': '宽度',
+        'resize_height': '高度',
+        'resize_mode': '调整模式:',
+        'resize_mode_stretch': '强制拉伸 (可能变形)',
+        'resize_mode_crop': '保持比例 (裁剪超出部分)',
+        'resize_mode_pad': '保持比例 (填充空白)',
+        'resize_button': '调整尺寸',
+        'resize_hint': '提示: 将当前图片调整为指定尺寸',
+        'resize_result': '已调整为 {width}×{height}',
+
+        # 缩放按钮提示
+        'zoom_in_hint': '放大',
+        'zoom_out_hint': '缩小',
+        'zoom_reset_hint': '重置缩放',
 
         # 操作按钮
         'save_button': '保存图片',
@@ -248,6 +286,8 @@ Development Date: 2025-11-06
         # 成功消息
         'success_crop': '切割完成！\n新尺寸: {width}x{height}',
         'success_save': '图片保存成功！',
+        'success_resize': '已调整为 {width}×{height} 像素',
+        'success_interactive_crop': '裁剪已应用！\n新尺寸: {width}x{height}',
 
         # 保存选项对话框
         'save_option_title': '保存选项',

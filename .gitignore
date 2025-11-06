@@ -142,8 +142,10 @@ Thumbs.db
 # Project specific
 language_config.json
 ImageProcessor_Release/
+ImageProcessor_Release_v*/
 test_output/
 *.bak
+nul
 
 # Claude Code files
 .claude/

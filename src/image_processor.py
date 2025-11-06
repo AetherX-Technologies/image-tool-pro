@@ -260,3 +260,94 @@ def image_to_canvas_coords(img_x, img_y, offset_x, offset_y, scale):
     canvas_x = img_x * scale + offset_x
     canvas_y = img_y * scale + offset_y
     return int(canvas_x), int(canvas_y)
+
+
+def resize_with_crop(image, target_width, target_height):
+    """
+    调整图像尺寸，保持比例并裁剪超出部分
+
+    策略：
+    1. 计算缩放比例以覆盖目标尺寸（取较大的比例）
+    2. 按比例缩放图像
+    3. 从中心裁剪到目标尺寸
+
+    参数:
+        image: PIL.Image对象
+        target_width: 目标宽度
+        target_height: 目标高度
+
+    返回:
+        调整后的PIL.Image对象
+    """
+    orig_width, orig_height = image.size
+
+    # 计算缩放比例（取较大值以覆盖目标尺寸）
+    scale_w = target_width / orig_width
+    scale_h = target_height / orig_height
+    scale = max(scale_w, scale_h)
+
+    # 缩放图像
+    new_width = int(orig_width * scale)
+    new_height = int(orig_height * scale)
+    resized = image.resize((new_width, new_height), Image.LANCZOS)
+
+    # 计算裁剪区域（居中）
+    left = (new_width - target_width) // 2
+    top = (new_height - target_height) // 2
+    right = left + target_width
+    bottom = top + target_height
+
+    # 裁剪
+    cropped = resized.crop((left, top, right, bottom))
+    return cropped
+
+
+def resize_with_pad(image, target_width, target_height, fill_color=(255, 255, 255)):
+    """
+    调整图像尺寸，保持比例并填充空白
+
+    策略：
+    1. 计算缩放比例以适应目标尺寸（取较小的比例）
+    2. 按比例缩放图像
+    3. 创建目标尺寸的白色画布
+    4. 将缩放后的图像居中粘贴
+
+    参数:
+        image: PIL.Image对象
+        target_width: 目标宽度
+        target_height: 目标高度
+        fill_color: 填充颜色，默认白色 (255, 255, 255)
+
+    返回:
+        调整后的PIL.Image对象
+    """
+    orig_width, orig_height = image.size
+
+    # 计算缩放比例（取较小值以适应目标尺寸）
+    scale_w = target_width / orig_width
+    scale_h = target_height / orig_height
+    scale = min(scale_w, scale_h)
+
+    # 缩放图像
+    new_width = int(orig_width * scale)
+    new_height = int(orig_height * scale)
+    resized = image.resize((new_width, new_height), Image.LANCZOS)
+
+    # 创建目标尺寸的画布
+    # 如果原图有透明通道，使用 RGBA 模式，否则使用 RGB
+    if image.mode in ('RGBA', 'LA') or (image.mode == 'P' and 'transparency' in image.info):
+        canvas = Image.new('RGBA', (target_width, target_height), fill_color + (255,))
+    else:
+        canvas = Image.new('RGB', (target_width, target_height), fill_color)
+
+    # 计算粘贴位置（居中）
+    paste_x = (target_width - new_width) // 2
+    paste_y = (target_height - new_height) // 2
+
+    # 粘贴图像
+    if resized.mode == 'RGBA':
+        canvas.paste(resized, (paste_x, paste_y), resized)
+    else:
+        canvas.paste(resized, (paste_x, paste_y))
+
+    return canvas

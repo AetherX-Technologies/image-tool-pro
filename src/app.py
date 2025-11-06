@@ -14,7 +14,8 @@ from .ui_components import (
     PixelInfoPanel,
     CenterCropPanel,
     CompressPanel,
-    ActionPanel
+    ActionPanel,
+    ResizePanel
 )
 from .language import get_text, set_language, get_current_language
 
@@ -53,6 +54,8 @@ class ImageProcessorApp:
         self.offset_y = 0          # 图像在Canvas上的Y偏移
         self.display_width = 0     # 显示宽度
         self.display_height = 0    # 显示高度
+        self.zoom_level = 1.0      # 手动缩放级别
+        self.manual_zoom = False   # 是否使用手动缩放
 
         # 中心点
         self.center_point = None   # (x, y) 原图坐标
@@ -118,8 +121,42 @@ class ImageProcessorApp:
         canvas_label = tk.Label(left_frame, text=get_text('canvas_label'), bg='lightgray')
         canvas_label.pack()
 
-        self.canvas = tk.Canvas(left_frame, bg='white', cursor='crosshair')
-        self.canvas.pack(fill='both', expand=True)
+        # 创建画布容器（用于容纳画布和滚动条）
+        canvas_container = tk.Frame(left_frame)
+        canvas_container.pack(fill='both', expand=True)
+
+        # 创建横向滚动条
+        self.h_scrollbar = tk.Scrollbar(canvas_container, orient='horizontal')
+        self.h_scrollbar.pack(side='bottom', fill='x')
+
+        # 创建纵向滚动条
+        self.v_scrollbar = tk.Scrollbar(canvas_container, orient='vertical')
+        self.v_scrollbar.pack(side='right', fill='y')
+
+        # 创建画布并绑定滚动条
+        self.canvas = tk.Canvas(
+            canvas_container,
+            bg='white',
+            cursor='crosshair',
+            xscrollcommand=self.h_scrollbar.set,
+            yscrollcommand=self.v_scrollbar.set
+        )
+        self.canvas.pack(side='left', fill='both', expand=True)
+
+        # 配置滚动条
+        self.h_scrollbar.config(command=self.canvas.xview)
+        self.v_scrollbar.config(command=self.canvas.yview)
+
+        # 为画布绑定鼠标滚轮（用于纵向滚动）
+        def on_canvas_mousewheel(event):
+            if self.manual_zoom and self.current_image:
+                # 只在手动缩放模式且有图片时启用滚动
+                self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+        self.canvas.bind("<MouseWheel>", on_canvas_mousewheel)
+
+        # 创建缩放按钮
+        self.create_zoom_buttons()
 
         # 右侧：控制面板
         right_frame = tk.Frame(main_container, width=300)
@@ -139,12 +176,18 @@ class ImageProcessorApp:
         canvas_scroll.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas_scroll.configure(yscrollcommand=scrollbar.set)
 
+        # 绑定鼠标滚轮（局部绑定，避免与画布滚动冲突）
+        def on_mousewheel(event):
+            canvas_scroll.yview_scroll(int(-1*(event.delta/120)), "units")
+
+        canvas_scroll.bind("<MouseWheel>", on_mousewheel)
+
         canvas_scroll.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
         # 添加各个控制面板
         # 1. 像素信息面板
-        self.pixel_info_panel = PixelInfoPanel(scrollable_frame)
+        self.pixel_info_panel = PixelInfoPanel(scrollable_frame, self.apply_interactive_crop)
         self.pixel_info_panel.frame.pack(fill='x', pady=5)
 
         # 2. 中心点切割面板
@@ -155,7 +198,11 @@ class ImageProcessorApp:
         self.compress_panel = CompressPanel(scrollable_frame, self.on_compress)
         self.compress_panel.frame.pack(fill='x', pady=5)
 
-        # 4. 操作按钮面板
+        # 4. 尺寸调整面板
+        self.resize_panel = ResizePanel(scrollable_frame, self.on_resize)
+        self.resize_panel.frame.pack(fill='x', pady=5)
+
+        # 5. 操作按钮面板
         self.action_panel = ActionPanel(scrollable_frame, self.save_image, self.show_preview)
         self.action_panel.frame.pack(fill='x', pady=5)
 
@@ -164,6 +211,121 @@ class ImageProcessorApp:
             self.root, text="就绪", bd=1, relief='sunken', anchor='w'
         )
         self.status_bar.pack(side='bottom', fill='x')
+
+    def create_zoom_buttons(self):
+        """在画布右上角创建缩放按钮"""
+        # 放大按钮
+        self.zoom_in_btn = tk.Button(
+            self.canvas,
+            text="+",
+            font=('Arial', 16, 'bold'),
+            width=2,
+            height=1,
+            command=self.zoom_in,
+            bg='white',
+            relief='raised'
+        )
+
+        # 缩小按钮
+        self.zoom_out_btn = tk.Button(
+            self.canvas,
+            text="-",
+            font=('Arial', 16, 'bold'),
+            width=2,
+            height=1,
+            command=self.zoom_out,
+            bg='white',
+            relief='raised'
+        )
+
+        # 重置按钮
+        self.zoom_reset_btn = tk.Button(
+            self.canvas,
+            text="1:1",
+            font=('Arial', 10, 'bold'),
+            width=3,
+            height=1,
+            command=self.zoom_reset,
+            bg='white',
+            relief='raised'
+        )
+
+        # 更新按钮位置
+        self.canvas.bind('<Configure>', self.update_zoom_buttons_position)
+
+    def update_zoom_buttons_position(self, event=None):
+        """更新缩放按钮位置到右上角"""
+        self.canvas.update()
+        canvas_width = self.canvas.winfo_width()
+
+        # 考虑纵向滚动条的宽度（如果可见）
+        scrollbar_offset = 0
+        if self.v_scrollbar.winfo_ismapped():
+            scrollbar_offset = 20  # 滚动条大约的宽度
+
+        # 放大按钮（最右边）
+        self.zoom_in_window = self.canvas.create_window(
+            canvas_width - 10 - scrollbar_offset, 10,
+            window=self.zoom_in_btn, anchor='ne'
+        )
+
+        # 缩小按钮（放大按钮左边）
+        self.zoom_out_window = self.canvas.create_window(
+            canvas_width - 50 - scrollbar_offset, 10,
+            window=self.zoom_out_btn, anchor='ne'
+        )
+
+        # 重置按钮（缩小按钮左边）
+        self.zoom_reset_window = self.canvas.create_window(
+            canvas_width - 95 - scrollbar_offset, 10,
+            window=self.zoom_reset_btn, anchor='ne'
+        )
+
+    def zoom_in(self):
+        """放大图像"""
+        if self.current_image is None:
+            return
+
+        # 每次放大 20%
+        self.zoom_level *= 1.2
+        self.manual_zoom = True
+
+        # 限制最大缩放 5倍
+        if self.zoom_level > 5.0:
+            self.zoom_level = 5.0
+            messagebox.showinfo(get_text('info'), "Maximum zoom level reached (5x)")
+            return
+
+        self.display_image_on_canvas()
+        self.update_status(f"Zoom: {self.zoom_level:.1f}x")
+
+    def zoom_out(self):
+        """缩小图像"""
+        if self.current_image is None:
+            return
+
+        # 每次缩小 20%
+        self.zoom_level /= 1.2
+        self.manual_zoom = True
+
+        # 限制最小缩放 0.1倍
+        if self.zoom_level < 0.1:
+            self.zoom_level = 0.1
+            messagebox.showinfo(get_text('info'), "Minimum zoom level reached (0.1x)")
+            return
+
+        self.display_image_on_canvas()
+        self.update_status(f"Zoom: {self.zoom_level:.1f}x")
+
+    def zoom_reset(self):
+        """重置缩放到适应窗口"""
+        if self.current_image is None:
+            return
+
+        self.zoom_level = 1.0
+        self.manual_zoom = False
+        self.display_image_on_canvas()
+        self.update_status("Zoom reset")
 
     def open_image(self):
         """打开图片文件"""
@@ -182,6 +344,10 @@ class ImageProcessorApp:
                 # 加载图像
                 self.original_image = image_processor.load_image(file_path)
                 self.current_image = self.original_image.copy()
+
+                # 重置缩放级别
+                self.zoom_level = 1.0
+                self.manual_zoom = False
 
                 # 显示图像
                 self.display_image_on_canvas()
@@ -210,16 +376,54 @@ class ImageProcessorApp:
         canvas_width = self.canvas.winfo_width()
         canvas_height = self.canvas.winfo_height()
 
-        # 缩放图像以适配Canvas
-        resized_image, self.scale, self.display_width, self.display_height = \
-            image_processor.fit_image_to_canvas(self.current_image, canvas_width, canvas_height)
+        if self.manual_zoom:
+            # 手动缩放模式：根据 zoom_level 缩放
+            img_width, img_height = self.current_image.size
+
+            # 首先计算适配Canvas的基础缩放
+            base_resized, base_scale, _, _ = \
+                image_processor.fit_image_to_canvas(self.current_image, canvas_width, canvas_height)
+
+            # 应用手动缩放级别
+            self.scale = base_scale * self.zoom_level
+            self.display_width = int(img_width * self.scale)
+            self.display_height = int(img_height * self.scale)
+
+            # 缩放图像
+            resized_image = self.current_image.resize(
+                (self.display_width, self.display_height),
+                Image.LANCZOS
+            )
+
+            # 手动缩放模式：如果图片大于画布，则左上角对齐；否则居中
+            if self.display_width > canvas_width or self.display_height > canvas_height:
+                # 图片超出画布，左上角对齐（便于滚动查看）
+                self.offset_x = 0
+                self.offset_y = 0
+
+                # 设置滚动区域为图片的实际大小
+                self.canvas.config(scrollregion=(0, 0, self.display_width, self.display_height))
+            else:
+                # 图片小于画布，居中显示
+                self.offset_x = (canvas_width - self.display_width) // 2
+                self.offset_y = (canvas_height - self.display_height) // 2
+
+                # 重置滚动区域
+                self.canvas.config(scrollregion=(0, 0, canvas_width, canvas_height))
+        else:
+            # 自动适配模式：缩放图像以适配Canvas
+            resized_image, self.scale, self.display_width, self.display_height = \
+                image_processor.fit_image_to_canvas(self.current_image, canvas_width, canvas_height)
+
+            # 计算居中显示的偏移量
+            self.offset_x = (canvas_width - self.display_width) // 2
+            self.offset_y = (canvas_height - self.display_height) // 2
+
+            # 重置滚动区域
+            self.canvas.config(scrollregion=(0, 0, canvas_width, canvas_height))
 
         # 转换为PhotoImage
         self.photo_image = ImageTk.PhotoImage(resized_image)
-
-        # 计算居中显示的偏移量
-        self.offset_x = (canvas_width - self.display_width) // 2
-        self.offset_y = (canvas_height - self.display_height) // 2
 
         # 清空Canvas并显示图像
         self.canvas.delete("all")
@@ -227,6 +431,9 @@ class ImageProcessorApp:
             self.offset_x, self.offset_y,
             image=self.photo_image, anchor='nw', tags='image'
         )
+
+        # 重新绘制缩放按钮
+        self.update_zoom_buttons_position()
 
     def on_crop_changed(self, x1, y1, x2, y2):
         """裁剪框改变回调"""
@@ -293,6 +500,48 @@ class ImageProcessorApp:
         except Exception as e:
             messagebox.showerror(get_text('error'), get_text('error_crop_failed', error=str(e)))
 
+    def apply_interactive_crop(self):
+        """应用交互式裁剪框"""
+        if self.current_image is None:
+            messagebox.showwarning(get_text('warning'), get_text('warn_no_image'))
+            return
+
+        # 获取裁剪框坐标
+        crop_rect = self.crop_tool.get_crop_rect()
+        if not crop_rect:
+            messagebox.showwarning(get_text('warning'), 'No crop box found')
+            return
+
+        try:
+            x1, y1, x2, y2 = crop_rect
+            # 转换为原始图像坐标（使用正确的坐标转换函数）
+            x1_orig, y1_orig = image_processor.canvas_to_image_coords(
+                x1, y1, self.offset_x, self.offset_y, self.scale
+            )
+            x2_orig, y2_orig = image_processor.canvas_to_image_coords(
+                x2, y2, self.offset_x, self.offset_y, self.scale
+            )
+
+            # 裁剪图片
+            cropped = image_processor.crop_image(
+                self.current_image, x1_orig, y1_orig, x2_orig, y2_orig
+            )
+
+            # 更新当前图像
+            self.current_image = cropped
+            self.display_image_on_canvas()
+
+            # 清除裁剪框
+            self.crop_tool.clear()
+            self.pixel_info_panel.clear()
+
+            crop_w, crop_h = cropped.size
+            self.update_status(f'Interactive crop applied: {crop_w}x{crop_h}')
+            messagebox.showinfo(get_text('success'), get_text('success_interactive_crop', width=crop_w, height=crop_h))
+
+        except Exception as e:
+            messagebox.showerror(get_text('error'), get_text('error_crop_failed', error=str(e)))
+
     def on_compress(self, target_size_kb, format_type):
         """执行图像压缩"""
         if self.current_image is None:
@@ -316,6 +565,55 @@ class ImageProcessorApp:
         except Exception as e:
             messagebox.showerror(get_text('error'), get_text('error_compress_failed', error=str(e)))
             return None
+
+    def on_resize(self, target_width, target_height, mode):
+        """执行图像尺寸调整"""
+        if self.current_image is None:
+            messagebox.showwarning(get_text('warning'), get_text('warn_no_image'))
+            return False
+
+        try:
+            # 获取原始尺寸
+            orig_width, orig_height = self.current_image.size
+
+            self.update_status(f"Resizing: {orig_width}×{orig_height} → {target_width}×{target_height}")
+
+            # 根据模式调整尺寸
+            if mode == 'stretch':
+                # 强制拉伸
+                resized = self.current_image.resize(
+                    (target_width, target_height),
+                    Image.LANCZOS
+                )
+            elif mode == 'crop':
+                # 保持比例，裁剪超出部分
+                resized = image_processor.resize_with_crop(
+                    self.current_image, target_width, target_height
+                )
+            elif mode == 'pad':
+                # 保持比例，填充空白
+                resized = image_processor.resize_with_pad(
+                    self.current_image, target_width, target_height
+                )
+            else:
+                messagebox.showerror(get_text('error'), f"Unknown resize mode: {mode}")
+                return False
+
+            # 更新当前图像
+            self.current_image = resized
+            self.display_image_on_canvas()
+
+            # 清除裁剪框
+            self.crop_tool.clear()
+            self.pixel_info_panel.clear()
+
+            self.update_status(f"Resize complete: {target_width}×{target_height}")
+            messagebox.showinfo(get_text('success'), get_text('success_resize', width=target_width, height=target_height))
+            return True
+
+        except Exception as e:
+            messagebox.showerror(get_text('error'), f"Resize failed: {str(e)}")
+            return False
 
     def save_image(self):
         """保存图片"""
@@ -447,6 +745,10 @@ class ImageProcessorApp:
         """重置图片到原始状态"""
         if self.original_image is None:
             return
+
+        # 重置缩放级别
+        self.zoom_level = 1.0
+        self.manual_zoom = False
 
         self.current_image = self.original_image.copy()
         self.display_image_on_canvas()

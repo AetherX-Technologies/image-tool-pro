@@ -37,7 +37,9 @@ class CropTool:
 
     def on_press(self, event):
         """鼠标按下事件"""
-        x, y = event.x, event.y
+        # 转换为Canvas坐标（考虑滚动偏移）
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
 
         # 检测是否点击在角点上
         corner = self.detect_corner(x, y)
@@ -67,7 +69,9 @@ class CropTool:
 
     def on_drag(self, event):
         """鼠标拖拽事件"""
-        x, y = event.x, event.y
+        # 转换为Canvas坐标（考虑滚动偏移）
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
 
         if self.drag_mode == 'new':
             # 绘制新矩形
