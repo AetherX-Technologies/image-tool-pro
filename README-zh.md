@@ -5,7 +5,7 @@
 ![Python 版本](https://img.shields.io/badge/python-3.7+-blue.svg)
 ![平台](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 ![许可证](https://img.shields.io/badge/license-MIT-green.svg)
-![GitHub 版本](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![GitHub 版本](https://img.shields.io/badge/version-1.1.1-blue.svg)
 
 **一款功能强大的桌面图像处理工具，支持交互式裁剪、智能压缩和多语言界面**
 
@@ -41,9 +41,12 @@
 
 - 鼠标拖动绘制裁剪区域
 - 使用角点控制手柄调整裁剪边界
+- **✨ v1.1.1 新增**: "确定截取"按钮，精确执行裁剪操作
 - 实时显示像素尺寸
 - 拖动裁剪区域内部即可移动位置
 - 红色裁剪框和控制点提供视觉反馈
+- **✨ v1.1.1 新增**: 放大后自动显示画布滚动条
+- **✨ v1.1.1 新增**: Shift+滚轮支持横向滚动画布
 
 ### 🎯 中心点切割
 
@@ -103,6 +106,25 @@
 
 ### 交互式裁剪实际操作
 ![裁剪演示](assets/screenshots/crop-demo.png)
+
+### ✨ 新功能: 确定截取按钮 (v1.1.1)
+[📸 **需要截图**: `interactive-crop-button.png`]
+
+**拍摄步骤**:
+1. 打开软件，加载一张图片
+2. 用鼠标拖动创建裁剪框（红色框）
+3. 确保右侧面板"当前选区信息"中的绿色"确定截取"按钮清晰可见
+4. 截取整个窗口
+
+### ✨ 新功能: 画布滚动条 (v1.1.1)
+[📸 **需要截图**: `canvas-scrollbar.png`]
+
+**拍摄步骤**:
+1. 打开一张图片
+2. 点击右上角 + 按钮多次放大图片，直到超出画布
+3. 确保左侧画布的横向和纵向滚动条都显示出来
+4. 可以拖动滚动条到中间位置，显示图片的部分区域
+5. 截取整个窗口
 
 ### 中心点切割功能
 ![中心切割1](assets/screenshots/center-cut1.png)
@@ -168,6 +190,8 @@
 | `Ctrl+S` | 保存图片 |
 | `左键拖动` | 创建/调整裁剪框 |
 | `右键点击` | 设置中心点 |
+| `鼠标滚轮` | 纵向滚动（放大时）|
+| `Shift+鼠标滚轮` | 横向滚动（放大时）|
 
 ---
 

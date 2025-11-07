@@ -5,7 +5,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![GitHub Release](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![GitHub Release](https://img.shields.io/badge/version-1.1.1-blue.svg)
 
 **A powerful desktop image processing tool with interactive cropping, smart compression, and multi-language support**
 
@@ -41,9 +41,12 @@ Intuitive drag-and-drop interface for effortless image cropping:
 
 - Draw crop areas with mouse drag
 - Adjust crop boundaries with corner handles
+- **✨ NEW in v1.1.1**: "Apply Crop" button for immediate crop execution
 - Real-time pixel dimension display
 - Move entire crop area by dragging
 - Visual feedback with red crop box and control points
+- **✨ NEW in v1.1.1**: Canvas scrollbars when zoomed beyond viewport
+- **✨ NEW in v1.1.1**: Shift+Scroll for horizontal canvas navigation
 
 ### 🎯 Center-Point Cutting
 
@@ -104,6 +107,25 @@ No hassle, no configuration:
 ### Interactive Cropping in Action
 ![image-20251106201319105](assets/screenshots/crop-demo.png)
 
+### ✨ NEW: Apply Crop Button (v1.1.1)
+[📸 **需要截图**: `interactive-crop-button.png`]
+
+**拍摄步骤**:
+1. 打开软件，加载一张图片
+2. 用鼠标拖动创建裁剪框（红色框）
+3. 确保右侧面板"当前选区信息"中的绿色"确定截取"按钮清晰可见
+4. 截取整个窗口
+
+### ✨ NEW: Canvas Scrollbars (v1.1.1)
+[📸 **需要截图**: `canvas-scrollbar.png`]
+
+**拍摄步骤**:
+1. 打开一张图片
+2. 点击右上角 + 按钮多次放大图片，直到超出画布
+3. 确保左侧画布的横向和纵向滚动条都显示出来
+4. 可以拖动滚动条到中间位置，显示图片的部分区域
+5. 截取整个窗口
+
 ### Center-Point Cutting Feature
 ![image-20251106201554946](assets/screenshots/center-cut1.png)
 
@@ -122,7 +144,7 @@ No hassle, no configuration:
 
 ## 📥 Download
 
-### Latest Release: v1.0.0
+### Latest Release: v1.1.1
 
 **[⬇️ Download Image Tool Pro for Windows](https://github.com/AetherX-Technologies/image-tool-pro/releases/latest)**
 
@@ -168,6 +190,8 @@ No installation required! Simply:
 | `Ctrl+S` | Save Image |
 | `Left-Drag` | Create/Adjust Crop Box |
 | `Right-Click` | Set Center Point |
+| `Mouse Wheel` | Vertical Scroll (when zoomed) |
+| `Shift+Mouse Wheel` | Horizontal Scroll (when zoomed) |
 
 ---
 
