@@ -674,6 +674,14 @@ class ImageProcessorApp:
         preview_window.title(get_text('preview_title'))
         preview_window.geometry("1000x600")
 
+        # 设置预览窗口图标
+        try:
+            icon_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'icon.ico')
+            if os.path.exists(icon_path):
+                preview_window.iconbitmap(icon_path)
+        except Exception:
+            pass  # 如果图标加载失败，继续运行
+
         # 标题
         title_label = tk.Label(
             preview_window, text=get_text('preview_header'),
