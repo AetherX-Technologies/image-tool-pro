@@ -122,20 +122,20 @@ class ImageProcessorApp:
         canvas_label.pack()
 
         # 创建画布容器（用于容纳画布和滚动条）
-        canvas_container = tk.Frame(left_frame)
-        canvas_container.pack(fill='both', expand=True)
+        self.canvas_container = tk.Frame(left_frame)
+        self.canvas_container.pack(fill='both', expand=True)
 
         # 创建横向滚动条
-        self.h_scrollbar = tk.Scrollbar(canvas_container, orient='horizontal')
+        self.h_scrollbar = tk.Scrollbar(self.canvas_container, orient='horizontal')
         self.h_scrollbar.pack(side='bottom', fill='x')
 
         # 创建纵向滚动条
-        self.v_scrollbar = tk.Scrollbar(canvas_container, orient='vertical')
+        self.v_scrollbar = tk.Scrollbar(self.canvas_container, orient='vertical')
         self.v_scrollbar.pack(side='right', fill='y')
 
         # 创建画布并绑定滚动条
         self.canvas = tk.Canvas(
-            canvas_container,
+            self.canvas_container,
             bg='white',
             cursor='crosshair',
             xscrollcommand=self.h_scrollbar.set,
@@ -228,34 +228,14 @@ class ImageProcessorApp:
         self.status_bar.pack(side='bottom', fill='x')
 
     def create_zoom_buttons(self):
-        """在画布右上角创建缩放按钮"""
-        # 放大按钮
-        self.zoom_in_btn = tk.Button(
-            self.canvas,
-            text="+",
-            font=('Arial', 16, 'bold'),
-            width=2,
-            height=1,
-            command=self.zoom_in,
-            bg='white',
-            relief='raised'
-        )
+        """在画布右上角创建缩放按钮（固定位置覆盖层）"""
+        # 创建按钮覆盖层Frame（固定在canvas_container右上角）
+        button_overlay = tk.Frame(self.canvas_container, bg='')
+        button_overlay.place(relx=1.0, rely=0.0, anchor='ne', x=-30, y=10)
 
-        # 缩小按钮
-        self.zoom_out_btn = tk.Button(
-            self.canvas,
-            text="-",
-            font=('Arial', 16, 'bold'),
-            width=2,
-            height=1,
-            command=self.zoom_out,
-            bg='white',
-            relief='raised'
-        )
-
-        # 重置按钮
+        # 重置按钮（最左边）
         self.zoom_reset_btn = tk.Button(
-            self.canvas,
+            button_overlay,
             text="1:1",
             font=('Arial', 10, 'bold'),
             width=3,
@@ -264,37 +244,33 @@ class ImageProcessorApp:
             bg='white',
             relief='raised'
         )
+        self.zoom_reset_btn.pack(side='left', padx=2)
 
-        # 更新按钮位置
-        self.canvas.bind('<Configure>', self.update_zoom_buttons_position)
-
-    def update_zoom_buttons_position(self, event=None):
-        """更新缩放按钮位置到右上角"""
-        self.canvas.update()
-        canvas_width = self.canvas.winfo_width()
-
-        # 考虑纵向滚动条的宽度（如果可见）
-        scrollbar_offset = 0
-        if self.v_scrollbar.winfo_ismapped():
-            scrollbar_offset = 20  # 滚动条大约的宽度
+        # 缩小按钮（中间）
+        self.zoom_out_btn = tk.Button(
+            button_overlay,
+            text="-",
+            font=('Arial', 16, 'bold'),
+            width=2,
+            height=1,
+            command=self.zoom_out,
+            bg='white',
+            relief='raised'
+        )
+        self.zoom_out_btn.pack(side='left', padx=2)
 
         # 放大按钮（最右边）
-        self.zoom_in_window = self.canvas.create_window(
-            canvas_width - 10 - scrollbar_offset, 10,
-            window=self.zoom_in_btn, anchor='ne'
+        self.zoom_in_btn = tk.Button(
+            button_overlay,
+            text="+",
+            font=('Arial', 16, 'bold'),
+            width=2,
+            height=1,
+            command=self.zoom_in,
+            bg='white',
+            relief='raised'
         )
-
-        # 缩小按钮（放大按钮左边）
-        self.zoom_out_window = self.canvas.create_window(
-            canvas_width - 50 - scrollbar_offset, 10,
-            window=self.zoom_out_btn, anchor='ne'
-        )
-
-        # 重置按钮（缩小按钮左边）
-        self.zoom_reset_window = self.canvas.create_window(
-            canvas_width - 95 - scrollbar_offset, 10,
-            window=self.zoom_reset_btn, anchor='ne'
-        )
+        self.zoom_in_btn.pack(side='left', padx=2)
 
     def zoom_in(self):
         """放大图像"""
@@ -416,8 +392,22 @@ class ImageProcessorApp:
                 self.offset_x = 0
                 self.offset_y = 0
 
-                # 设置滚动区域为图片的实际大小
-                self.canvas.config(scrollregion=(0, 0, self.display_width, self.display_height))
+                # 设置滚动区域为图片的实际大小，并考虑滚动条占用的空间
+                scrollbar_size = 20  # 滚动条大约占用20像素
+
+                # 计算实际需要的滚动区域大小
+                scroll_width = self.display_width
+                scroll_height = self.display_height
+
+                # 如果垂直滚动条会出现，横向需要额外空间
+                if self.display_height > canvas_height:
+                    scroll_width = max(scroll_width, self.display_width + scrollbar_size)
+
+                # 如果横向滚动条会出现，纵向需要额外空间
+                if self.display_width > canvas_width:
+                    scroll_height = max(scroll_height, self.display_height + scrollbar_size)
+
+                self.canvas.config(scrollregion=(0, 0, scroll_width, scroll_height))
             else:
                 # 图片小于画布，居中显示
                 self.offset_x = (canvas_width - self.display_width) // 2
@@ -446,9 +436,6 @@ class ImageProcessorApp:
             self.offset_x, self.offset_y,
             image=self.photo_image, anchor='nw', tags='image'
         )
-
-        # 重新绘制缩放按钮
-        self.update_zoom_buttons_position()
 
     def on_crop_changed(self, x1, y1, x2, y2):
         """裁剪框改变回调"""
