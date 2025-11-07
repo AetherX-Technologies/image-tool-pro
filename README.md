@@ -108,23 +108,10 @@ No hassle, no configuration:
 ![image-20251106201319105](assets/screenshots/crop-demo.png)
 
 ### ✨ NEW: Apply Crop Button (v1.1.1)
-[📸 **需要截图**: `interactive-crop-button.png`]
-
-**拍摄步骤**:
-1. 打开软件，加载一张图片
-2. 用鼠标拖动创建裁剪框（红色框）
-3. 确保右侧面板"当前选区信息"中的绿色"确定截取"按钮清晰可见
-4. 截取整个窗口
+![image-20251106201554946](assets/screenshots/interactive-crop-button.png)
 
 ### ✨ NEW: Canvas Scrollbars (v1.1.1)
-[📸 **需要截图**: `canvas-scrollbar.png`]
-
-**拍摄步骤**:
-1. 打开一张图片
-2. 点击右上角 + 按钮多次放大图片，直到超出画布
-3. 确保左侧画布的横向和纵向滚动条都显示出来
-4. 可以拖动滚动条到中间位置，显示图片的部分区域
-5. 截取整个窗口
+![image-20251106201554946](assets/screenshots/canvas-scrollbar.png)
 
 ### Center-Point Cutting Feature
 ![image-20251106201554946](assets/screenshots/center-cut1.png)

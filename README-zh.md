@@ -108,23 +108,10 @@
 ![裁剪演示](assets/screenshots/crop-demo.png)
 
 ### ✨ 新功能: 确定截取按钮 (v1.1.1)
-[📸 **需要截图**: `interactive-crop-button.png`]
-
-**拍摄步骤**:
-1. 打开软件，加载一张图片
-2. 用鼠标拖动创建裁剪框（红色框）
-3. 确保右侧面板"当前选区信息"中的绿色"确定截取"按钮清晰可见
-4. 截取整个窗口
+![确定截取按钮](assets/screenshots/interactive-crop-button.png)
 
 ### ✨ 新功能: 画布滚动条 (v1.1.1)
-[📸 **需要截图**: `canvas-scrollbar.png`]
-
-**拍摄步骤**:
-1. 打开一张图片
-2. 点击右上角 + 按钮多次放大图片，直到超出画布
-3. 确保左侧画布的横向和纵向滚动条都显示出来
-4. 可以拖动滚动条到中间位置，显示图片的部分区域
-5. 截取整个窗口
+![画布滚动条](assets/screenshots/canvas-scrollbar.png)
 
 ### 中心点切割功能
 ![中心切割1](assets/screenshots/center-cut1.png)
