@@ -147,11 +147,14 @@ class ImageProcessorApp:
         self.h_scrollbar.config(command=self.canvas.xview)
         self.v_scrollbar.config(command=self.canvas.yview)
 
-        # 为画布绑定鼠标滚轮（用于纵向滚动）
+        # 为画布绑定鼠标滚轮（支持横向和纵向滚动）
         def on_canvas_mousewheel(event):
             if self.manual_zoom and self.current_image:
-                # 只在手动缩放模式且有图片时启用滚动
-                self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+                # Shift+滚轮 = 横向滚动，普通滚轮 = 纵向滚动
+                if event.state & 0x1:  # 检测 Shift 键
+                    self.canvas.xview_scroll(int(-1*(event.delta/120)), "units")
+                else:
+                    self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
         self.canvas.bind("<MouseWheel>", on_canvas_mousewheel)
 
@@ -176,11 +179,20 @@ class ImageProcessorApp:
         canvas_scroll.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas_scroll.configure(yscrollcommand=scrollbar.set)
 
-        # 绑定鼠标滚轮（局部绑定，避免与画布滚动冲突）
+        # 绑定鼠标滚轮（递归绑定到所有子控件）
         def on_mousewheel(event):
             canvas_scroll.yview_scroll(int(-1*(event.delta/120)), "units")
 
+        def bind_mousewheel_recursively(widget):
+            """递归绑定鼠标滚轮到控件及其所有子控件"""
+            widget.bind("<MouseWheel>", on_mousewheel)
+            for child in widget.winfo_children():
+                bind_mousewheel_recursively(child)
+
+        # 绑定到 canvas_scroll 和所有子控件
         canvas_scroll.bind("<MouseWheel>", on_mousewheel)
+        # 保存递归绑定函数供后续使用
+        self._bind_mousewheel_to_panel = bind_mousewheel_recursively
 
         canvas_scroll.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
@@ -205,6 +217,9 @@ class ImageProcessorApp:
         # 5. 操作按钮面板
         self.action_panel = ActionPanel(scrollable_frame, self.save_image, self.show_preview)
         self.action_panel.frame.pack(fill='x', pady=5)
+
+        # 递归绑定鼠标滚轮到所有面板（确保所有控件都支持滚动）
+        self._bind_mousewheel_to_panel(scrollable_frame)
 
         # 底部状态栏
         self.status_bar = tk.Label(
